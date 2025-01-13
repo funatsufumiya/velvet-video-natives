@@ -7,6 +7,8 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+# FIXME: disabling macOS currently for vpx no decoder problem
+
 jobs:
   build:
     strategy:
@@ -18,9 +20,9 @@ jobs:
           - os: windows-latest
             shell: 'msys2 {0}'
             arch: x86_64
-          - os: macos-latest
-            shell: bash
-            arch: arm64
+          # - os: macos-latest
+          #   shell: bash
+          #   arch: arm64
     runs-on: ${{ matrix.os }}
     
     steps:
@@ -85,7 +87,7 @@ jobs:
             pkg-config \
             mingw-w64
 
-          brew install automake fdk-aac git lame libass libtool libvorbis \
+          brew install automake fdk-aac git lame libass libtool libvorbis libvpx \
             opus sdl shtool texi2html theora wget x264 x265 xvid nasm
 
       - name: Check gcc, strings and ar (Windows)
