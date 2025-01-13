@@ -461,8 +461,9 @@ jobs:
           # Copy source files
           mkdir -p natives-free/src
           mkdir -p natives-full/src
-          cp -r $SOURCES_DIR/* natives-free/src/
-          cp -r $SOURCES_DIR/* natives-full/src/
+          # But not actually copy the source files, because they are too big
+          # cp -r $SOURCES_DIR/* natives-free/src/
+          # cp -r $SOURCES_DIR/* natives-full/src/
 
       - name: Copy Native Libraries to Project Structure (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -486,8 +487,9 @@ jobs:
           # Copy source files
           mkdir -p natives-free/src
           mkdir -p natives-full/src
-          cp -r $SOURCES_DIR/* natives-free/src/
-          cp -r $SOURCES_DIR/* natives-full/src/
+          # But not actually copy the source files, because they are too big
+          # cp -r $SOURCES_DIR/* natives-free/src/
+          # cp -r $SOURCES_DIR/* natives-full/src/
 
       - name: Copy Native Libraries to Project Structure (MacOS)
         if: matrix.os == 'macos-latest'
