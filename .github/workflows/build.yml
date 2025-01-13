@@ -161,6 +161,10 @@ jobs:
       - name: Build Libraries (Windows)
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
+        env:
+          FREE_CONFIG: "--disable-all --enable-libvorbis --enable-libvpx --enable-libaom --enable-libopus --enable-libmp3lame --enable-decoder=vp8,vp9,libaom_av1,libopus,libmp3lame --enable-encoder=libvpx_vp8,libvpx_vp9,libaom_av1,libopus,libmp3lame --enable-muxer=ogg,webm,matroska,liblamemp3 --enable-demuxer=ogg,webm,matroska --enable-bsf=vp9_superframe"
+          FULL_CONFIG: "--enable-gpl --enable-libx264 --enable-libx265 --enable-libvpx --enable-libvorbis --enable-libaom --enable-libopenh264 --enable-libopus --enable-libmp3lame"
+          COMMON_CONFIG: "--disable-static --enable-shared --disable-doc --enable-pic --disable-programs --disable-postproc --disable-avdevice --enable-version3 --enable-avcodec --enable-avformat --enable-avfilter --enable-swscale --enable-swresample --pkg-config-flags=--static --pkg-config=pkg-config"
         run: |
           export NCORES=${{ steps.cpu-cores.outputs.count }}
           export SOURCES_DIR=${{ github.workspace }}/build-sources
@@ -242,6 +246,10 @@ jobs:
       - name: Build Libraries (Linux)
         if: matrix.os == 'ubuntu-latest'
         shell: bash
+        env:
+          FREE_CONFIG: "--disable-all --enable-libvorbis --enable-libvpx --enable-libaom --enable-libopus --enable-libmp3lame --enable-decoder=vp8,vp9,libaom_av1,libopus,libmp3lame --enable-encoder=libvpx_vp8,libvpx_vp9,libaom_av1,libopus,libmp3lame --enable-muxer=ogg,webm,matroska,liblamemp3 --enable-demuxer=ogg,webm,matroska --enable-bsf=vp9_superframe"
+          FULL_CONFIG: "--enable-gpl --enable-libx264 --enable-libx265 --enable-libvpx --enable-libvorbis --enable-libaom --enable-libopenh264 --enable-libopus --enable-libmp3lame"
+          COMMON_CONFIG: "--disable-static --enable-shared --disable-doc --enable-pic --disable-programs --disable-postproc --disable-avdevice --enable-version3 --enable-avcodec --enable-avformat --enable-avfilter --enable-swscale --enable-swresample --pkg-config-flags=--static --pkg-config=pkg-config"
         run: |
           export NCORES=${{ steps.cpu-cores.outputs.count }}
           export SOURCES_DIR=${{ github.workspace }}/build-sources
@@ -289,13 +297,15 @@ jobs:
           make -j $NCORES OS=linux ARCH=x86_64 PREFIX=$DEST install
           
           mkdir -p $BASE/release/linux64/free
-          cd ../FFmpeg
+          cd $BASE
+          cd ./FFmpeg
           ./configure $FREE_CONFIG $COMMON_CONFIG $LINUX_CONFIG
           make -j $NCORES && make install
           cd $DEST/lib && cp lib*.so* $BASE/release/linux64/free
           
           mkdir -p $BASE/release/linux64/full
-          cd ../../FFmpeg
+          cd $BASE
+          cd ./FFmpeg
           make clean
           ./configure $FULL_CONFIG $COMMON_CONFIG $LINUX_CONFIG --extra-libs=-lpthread
           make -j $NCORES && make install
