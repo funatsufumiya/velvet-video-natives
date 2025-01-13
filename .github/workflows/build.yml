@@ -11,46 +11,233 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            shell: bash
+          - os: windows-latest
+            shell: msys2 {0}
     runs-on: ${{ matrix.os }}
     
     steps:
       - uses: actions/checkout@v3
       
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
-      
-      - name: Build FFmpeg Prepare
+      # Windows specific setup
+      - name: Prepare Windows Environment
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-yasm
+            mingw-w64-x86_64-nasm
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-make
+            git
+
+      # Windows specific setup
+      - name: Prepare Windows Environment (wget tar)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
         run: |
-          docker build -t ffmpeg-prepare - < script/Dockerfile-prepare
-      
-      - name: Build Platform Specific Image
+          pacman -S --noconfirm wget tar
+            
+      # Linux specific setup
+      - if: matrix.os == 'ubuntu-latest'
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            docker build -t ffmpeg-linux - < script/Dockerfile-linux
-          else
-            docker build -t ffmpeg-windows - < script/Dockerfile-windows
-          fi
-        shell: bash
-      
-      - name: Create Output Directory
-        run: mkdir -p script/output
-        shell: bash
-      
-      - name: Run Platform Build
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc make cmake \
+            yasm nasm \
+            pkg-config \
+            mingw-w64
+            
+      - name: Download and extract dependencies
+        shell: ${{ matrix.shell }}
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            docker run -v ${PWD}/script/output:/output --name ffmpeg-lin --rm ffmpeg-linux
-          else
-            docker run -v ${PWD}/script/output:/output --name ffmpeg-win --rm ffmpeg-windows
-          fi
+          mkdir -p sources
+          cd sources
+          
+          # Core repositories
+          git clone --branch n4.2 --depth 1 https://github.com/FFmpeg/FFmpeg.git
+          git clone --branch v1.8.1 --depth 1 https://chromium.googlesource.com/webm/libvpx
+          git clone --depth 1 https://github.com/mirror/x264.git
+          git clone --branch 3.1.1 --depth 1 https://github.com/videolan/x265.git
+          git clone --branch v1.0.0-errata1 --depth 1 https://aomedia.googlesource.com/aom
+          git clone --branch v2.0.0 --depth 1 https://github.com/cisco/openh264.git
+
+          # Archive downloads
+          wget ${WGET_OPTIONS} http://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz
+          tar xzf libogg-1.3.4.tar.gz
+          rm libogg-1.3.4.tar.gz
+
+          wget ${WGET_OPTIONS} http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
+          tar xzf libvorbis-1.3.3.tar.gz
+          rm libvorbis-1.3.3.tar.gz
+
+          wget ${WGET_OPTIONS} https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.3.1.tar.gz
+          tar xzf opus-1.3.1.tar.gz
+          rm opus-1.3.1.tar.gz
+
+          wget ${WGET_OPTIONS} https://netcologne.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+          tar xzf lame-3.100.tar.gz
+          rm lame-3.100.tar.gz
+        env:
+          WGET_OPTIONS: ${{ matrix.os == 'windows-latest' && '--no-check-certificate' || '' }}
+
+      - name: Post-process Windows Sources
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          MSYS2_ARG_CONV_EXCL="*" cp -r sources /sources
+
+      - name: Post-process Linux Sources
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cp -r sources /sources
+
+      - name: Build Windows Libraries
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          export BASE=$PWD
+          export DEST=$BASE/ffmpeg-build-windows
+          export PREFIX="--prefix=$DEST"
+          export HOST="--host=x86_64-w64-mingw32"
+          export CROSSPREFIX="--cross-prefix=x86_64-w64-mingw32-"
+          export PKG_CONFIG_PATH=$DEST/lib/pkgconfig
+
+          cd sources/libogg-1.3.4
+          ./configure $PREFIX $HOST --disable-shared --enable-static && make && make install
+          
+          cd ../libvorbis-1.3.3
+          ./configure $PREFIX $HOST --disable-shared --enable-static && make && make install
+          
+          cd ../opus-1.3.1
+          ./configure $PREFIX $HOST --disable-shared --enable-static CFLAGS="-O3 -fPIC" && make && make install
+          
+          cd ../lame-3.100
+          ./configure $PREFIX $HOST --disable-shared --enable-static CFLAGS="-O3 -fPIC" && make && make install
+
+          mkdir -p vpx-build-windows
+          cd vpx-build-windows
+          CROSS=x86_64-w64-mingw32- ../libvpx/configure --target=x86_64-win64-gcc $PREFIX \
+            --enable-static --disable-shared --disable-debug --enable-experimental --enable-static-msvcrt \
+            --disable-examples --disable-tools --disable-docs --disable-unit-tests \
+            --enable-pic --enable-small
+          make && make install
+
+          cd ../x264
+          ./configure $HOST $PREFIX $CROSSPREFIX --disable-cli --enable-static --enable-strip --enable-pic \
+            --disable-lavf --disable-swscale
+          make && make install
+
+          cd ../x265/build/linux
+          echo "SET(CMAKE_SYSTEM_NAME Windows)" >> build.cmake
+          echo "SET(CMAKE_C_COMPILER   x86_64-w64-mingw32-gcc) " >> build.cmake
+          echo "SET(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++) " >> build.cmake
+          echo "SET(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres) " >> build.cmake
+          echo "SET(CMAKE_RANLIB x86_64-w64-mingw32-ranlib) " >> build.cmake
+          echo "SET(CMAKE_ASM_YASM_COMPILER yasm) " >> build.cmake
+          echo "option(ENABLE_SHARED OFF) " >> build.cmake
+          cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$DEST -DENABLE_SHARED=off \
+            -DCMAKE_TOOLCHAIN_FILE=build.cmake ../../source
+          make && make install
+
+          cd ../../../aom/build
+          cmake -G "Unix Makefiles" -DENABLE_TESTS=0 -DENABLE_DOCS=0 -DCMAKE_INSTALL_PREFIX=$DEST \
+            -DCMAKE_TOOLCHAIN_FILE=$BASE/aom/build/cmake/toolchains/x86_64-mingw-gcc.cmake ..
+          make && make install
+
+          cd ../../openh264
+          make OS=mingw_nt ARCH=x86_64 PREFIX=$DEST install
+
+          export WINDOWS_CONFIG="--arch=x86_64 --target-os=mingw32 $CROSSPREFIX $PREFIX --disable-dxva2 --disable-w32threads"
+
+          mkdir -p $BASE/release/windows64/free
+          cd ../FFmpeg
+          ./configure $FREE_CONFIG $COMMON_CONFIG $WINDOWS_CONFIG \
+            --extra-cflags="-I$DEST/include -static -static-libstdc++" \
+            --extra-ldflags="-L$DEST/lib -static -static-libstdc++"
+          make && make install
+          cp $DEST/bin/*.dll $BASE/release/windows64/free/
+
+          mkdir -p $BASE/release/windows64/full
+          cd ../FFmpeg
+          make clean
+          ./configure $FULL_CONFIG $COMMON_CONFIG $WINDOWS_CONFIG \
+            --extra-cflags="-I$DEST/include -static-libstdc++ -static-libgcc -static" \
+            --extra-cxxflags="-I$DEST/include -static-libstdc++ -static-libgcc -static" \
+            --extra-ldflags="-L$DEST/lib -static-libstdc++ -static-libgcc -static"
+          make && make install
+          cp $DEST/bin/*.dll $BASE/release/windows64/full/
+          cp /usr/lib/gcc/x86_64-w64-mingw32/7.3-win32/libgcc_s_seh-1.dll $BASE/release/windows64/full/
+
+      - name: Build Libraries (Linux)
+        if: matrix.os == 'ubuntu-latest'
         shell: bash
-      
+        run: |
+          export BASE=$PWD
+          export DEST=$BASE/ffmpeg-build-linux
+          export PREFIX="--prefix=$DEST"
+          export PKG_CONFIG_PATH=$DEST/lib/pkgconfig
+          export LINUX_CONFIG="--extra-cflags=-I$DEST/include --extra-ldflags=-L$DEST/lib $PREFIX"
+          
+          cd sources/libogg-1.3.4
+          ./configure $PREFIX --disable-shared --enable-static && make && make install
+          
+          cd ../libvorbis-1.3.3
+          ./configure $PREFIX --disable-shared --enable-static && make && make install
+          
+          cd ../opus-1.3.1
+          ./configure $PREFIX --disable-shared --enable-static CFLAGS="-O3 -fPIC" && make && make install
+          
+          cd ../lame-3.100
+          ./configure $PREFIX --disable-shared --enable-static CFLAGS="-O3 -fPIC" && make && make install
+          
+          mkdir -p vpx-build-linux
+          cd vpx-build-linux
+          ../libvpx/configure $PREFIX \
+            --enable-static --disable-shared --disable-debug --enable-experimental \
+            --disable-examples --disable-tools --disable-docs --disable-unit-tests \
+            --enable-pic --enable-small
+          make && make install
+          
+          cd ../x264
+          ./configure $PREFIX --disable-cli --enable-static --enable-pic --enable-strip --disable-lavf --disable-swscale
+          make && make install
+          
+          cd ../x265/build/linux
+          cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$DEST -DENABLE_SHARED=off ../../source
+          make && make install
+          
+          cd ../../../aom/build
+          cmake -G "Unix Makefiles" -DENABLE_TESTS=0 -DENABLE_DOCS=0 -DCMAKE_INSTALL_PREFIX=$DEST ..
+          make && make install
+          
+          cd ../../openh264
+          make OS=linux ARCH=x86_64 PREFIX=$DEST install
+          
+          mkdir -p $BASE/release/linux64/free
+          cd ../FFmpeg
+          ./configure $FREE_CONFIG $COMMON_CONFIG $LINUX_CONFIG
+          make && make install
+          cd $DEST/lib && cp lib*.so.? $BASE/release/linux64/free && cp lib*.so.?? $BASE/release/linux64/free
+          
+          mkdir -p $BASE/release/linux64/full
+          cd ../../FFmpeg
+          make clean
+          ./configure $FULL_CONFIG $COMMON_CONFIG $LINUX_CONFIG --extra-libs=-lpthread
+          make && make install
+          cd $DEST/lib && cp lib*.so.? $BASE/release/linux64/full && cp lib*.so.?? $BASE/release/linux64/full
+          
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: native-libs-${{ matrix.os }}
-          path: script/output/release
+          path: release
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -59,5 +246,5 @@ jobs:
           java-version: '11'
           
       - name: Build with Gradle
-        run: ./gradlew clean jar --no-daemon
         shell: bash
+        run: ./gradlew clean jar --no-daemon
