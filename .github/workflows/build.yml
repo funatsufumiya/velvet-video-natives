@@ -273,7 +273,7 @@ jobs:
           export DEST=$BASE/ffmpeg-build-macos
           export PREFIX="--prefix=$DEST"
           export PKG_CONFIG_PATH=$DEST/lib/pkgconfig
-          export ARCH={{ matrix.arch }}
+          export ARCH=${{ matrix.arch }}
           export MACOS_CONFIG="--arch=$ARCH --extra-cflags=-I$DEST/include --extra-ldflags=-L$DEST/lib $PREFIX"
           
           cd $SOURCES_DIR/libogg-1.3.4
