@@ -48,7 +48,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
         run: |
-          export SOURCES_DIR=${{ github.workspace }}/build-sources
+          export WORKSPACE_DIR=$PWD
+          #export SOURCES_DIR=${{ github.workspace }}/build-sources
+          export SOURCES_DIR=$WORKSPACE_DIR/build-sources
           export BASE=$SOURCES_DIR
           export DEST=$BASE/ffmpeg-build-windows
 
