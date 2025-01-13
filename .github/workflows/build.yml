@@ -87,6 +87,7 @@ jobs:
             diffutils
             grep
             make
+            zip
             wget
             tar
             git   
@@ -96,7 +97,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            gcc make cmake \
+            gcc make cmake zip \
             yasm nasm \
             pkg-config \
             mingw-w64
@@ -105,7 +106,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install \
-            gcc make cmake \
+            gcc make cmake zip \
             vorbis-tools \
             yasm nasm \
             pkg-config \
@@ -534,18 +535,23 @@ jobs:
           rm -rf natives-full/src/openh264/testbin natives-full/src/openh264/autotest natives-full/src/openh264/res
           rm -rf natives-full/src/x264/.git natives-full/src/x264/doc natives-full/src/x264/tools
           rm -rf natives-full/src/x265/.git natives-full/src/x265/doc natives-full/src/x265/source/profile natives-full/src/x265/source/test
+
+      - name: Zip for Artifacts
+        run: |
+          zip -r natives-free.zip natives-free
+          zip -r natives-full.zip natives-full
           
       - name: Upload Artifacts (free)
         uses: actions/upload-artifact@v3
         with:
-          name: native-libs-${{ matrix.os }}
-          path: natives-free/
+          name: native-libs-${{ matrix.os }}-${{ matrix.arch }}.zip
+          path: natives-free.zip
 
       - name: Upload Artifacts (full)
         uses: actions/upload-artifact@v3
         with:
-          name: native-libs-${{ matrix.os }}
-          path: natives-full/
+          name: native-libs-${{ matrix.os }}-${{ matrix.arch }}.zip
+          path: natives-full.zip
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -560,7 +566,7 @@ jobs:
       - name: Upload Artifacts (from Gradle)
         uses: actions/upload-artifact@v3
         with:
-          name: gradle-build-${{ matrix.os }}
+          name: gradle-build-${{ matrix.os }}-${{ matrix.arch }}.zip
           path: |
             natives-free/build/libs/*.jar
             natives-full/build/libs/*.jar
