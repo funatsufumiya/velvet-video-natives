@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 # FIXME: disabling macOS currently for vpx no decoder problem
+# FIXME: disabling windows currently for 
 
 jobs:
   build:
@@ -178,6 +179,21 @@ jobs:
           wget ${WGET_OPTIONS} https://netcologne.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
           tar xzf lame-3.100.tar.gz
           rm lame-3.100.tar.gz
+
+      - name: Check base paths (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          export SOURCES_DIR=${{ github.workspace }}/build-sources
+          export BASE=$SOURCES_DIR
+          export DEST=$BASE/ffmpeg-build-windows
+
+          echo "SOURCES_DIR=$SOURCES_DIR"
+          echo "BASE=$BASE"
+          echo "DEST=$DEST"
+
+          # force make failure
+          forcefully-making-failure-here
 
       - name: Build Libraries (Windows)
         if: matrix.os == 'windows-latest'
