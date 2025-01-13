@@ -55,6 +55,7 @@ jobs:
             mingw-w64-x86_64-doxygen
             binutils
             diffutils
+            grep
             make
             wget
             tar
@@ -75,6 +76,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: 'msys2 {0}'
         run: |
+          which x86_64-w64-mingw32-gcc
           x86_64-w64-mingw32-gcc --version
           x86_64-w64-mingw32-strings --version
           x86_64-w64-mingw32-ar --version
