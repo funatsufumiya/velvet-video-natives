@@ -79,9 +79,10 @@ jobs:
           which x86_64-w64-mingw32-gcc
           x86_64-w64-mingw32-gcc --version
 
-          ls /mingw64/bin/ | grep strings
-          ls /mingw64/bin/ | grep ar
+          # ls /mingw64/bin/ | grep strings
+          # ls /mingw64/bin/ | grep ar
 
+          # FIXME: not found
           # x86_64-w64-mingw32-strings --version
           # x86_64-w64-mingw32-ar --version
 
@@ -291,14 +292,14 @@ jobs:
           cd ../FFmpeg
           ./configure $FREE_CONFIG $COMMON_CONFIG $LINUX_CONFIG
           make -j $NCORES && make install
-          cd $DEST/lib && cp lib*.so.? $BASE/release/linux64/free && cp lib*.so.?? $BASE/release/linux64/free
+          cd $DEST/lib && cp lib*.so* $BASE/release/linux64/free
           
           mkdir -p $BASE/release/linux64/full
           cd ../../FFmpeg
           make clean
           ./configure $FULL_CONFIG $COMMON_CONFIG $LINUX_CONFIG --extra-libs=-lpthread
           make -j $NCORES && make install
-          cd $DEST/lib && cp lib*.so.? $BASE/release/linux64/full && cp lib*.so.?? $BASE/release/linux64/full
+          cd $DEST/lib && cp lib*.so* $BASE/release/linux64/full
           
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
