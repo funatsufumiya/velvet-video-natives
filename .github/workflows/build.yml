@@ -227,6 +227,12 @@ jobs:
             exit 1
           fi
 
+          # check exists libavcodec/x86/mathops.h
+          if [ ! -f libavcodec/x86/mathops.h ]; then
+            echo "$PWD/libavcodec/x86/mathops.h not found"
+            exit 1
+          fi
+
           # apply patch
           patch -p1 < $PATCH_FILE
           rm -f $PATCH_FILE
