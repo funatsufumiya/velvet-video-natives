@@ -447,16 +447,16 @@ jobs:
           export BASE=$WORKSPACE_DIR
 
           # Create directories for free version
-          mkdir -p natives-free/velvet-video-natives/linux64
+          mkdir -p natives-free/velvet-video-natives/windows64
           
           # Create directories for full version  
-          mkdir -p natives-full/velvet-video-natives/linux64
+          mkdir -p natives-full/velvet-video-natives/windows64
           
           # Copy built libraries for free version
-          cp -r $BASE/release/linux64/free/* natives-free/velvet-video-natives/linux64/
+          cp -r $BASE/release/windows64/free/* natives-free/velvet-video-natives/windows64/
           
           # Copy built libraries for full version
-          cp -r $BASE/release/linux64/full/* natives-full/velvet-video-natives/linux64/
+          cp -r $BASE/release/windows64/full/* natives-full/velvet-video-natives/windows64/
           
           # Copy source files
           mkdir -p natives-free/src
