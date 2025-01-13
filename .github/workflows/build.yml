@@ -37,6 +37,28 @@ jobs:
         run: |
           echo "Number of CPU cores: ${{ steps.cpu-cores.outputs.count }}"
  
+      - name: Prepare Environment for checking (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+
+      - name: Check base paths (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          export SOURCES_DIR=${{ github.workspace }}/build-sources
+          export BASE=$SOURCES_DIR
+          export DEST=$BASE/ffmpeg-build-windows
+
+          echo "SOURCES_DIR=$SOURCES_DIR"
+          echo "BASE=$BASE"
+          echo "DEST=$DEST"
+
+          # force make failure
+          forcefully-making-failure-here
+
       - name: Prepare Environment (Windows)
         if: matrix.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
@@ -66,23 +88,8 @@ jobs:
             make
             wget
             tar
-            git
+            git   
 
-      - name: Check base paths (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: msys2 {0}
-        run: |
-          export SOURCES_DIR=${{ github.workspace }}/build-sources
-          export BASE=$SOURCES_DIR
-          export DEST=$BASE/ffmpeg-build-windows
-
-          echo "SOURCES_DIR=$SOURCES_DIR"
-          echo "BASE=$BASE"
-          echo "DEST=$DEST"
-
-          # force make failure
-          forcefully-making-failure-here
-            
       - name: Prepare Environment (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
