@@ -219,7 +219,7 @@ jobs:
           cd $SOURCES_DIR/FFmpeg
 
           # create patch file
-          PATCH_FILE=patches/libavcodec_x86_mathops.h.patch
+          PATCH_FILE=$WORKSPACE_DIR/patches/libavcodec_x86_mathops.h.patch
 
           # check exists
           if [ ! -f $PATCH_FILE ]; then
