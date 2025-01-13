@@ -25,8 +25,9 @@ jobs:
         id: cpu-cores
         uses: SimenB/github-actions-cpu-cores@v2
         
-      # - name: Run test
-      #   run: yarn jest --max-workers ${{ steps.cpu-cores.outputs.count }}
+      - name: Print number of CPU cores
+        run: |
+          echo "Number of CPU cores: ${{ steps.cpu-cores.outputs.count }}"
       
       # Windows specific setup
       - name: Prepare Environment (Windows)
@@ -41,7 +42,7 @@ jobs:
             mingw-w64-x86_64-yasm
             mingw-w64-x86_64-nasm
             mingw-w64-x86_64-pkg-config
-            diff
+            diffutils
             make
             wget
             tar
