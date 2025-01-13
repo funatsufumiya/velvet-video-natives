@@ -292,10 +292,14 @@ jobs:
           
           mkdir -p vpx-build-macos
           cd vpx-build-macos
+          # ../../libvpx/configure $PREFIX \
+          #   --enable-static --disable-shared --disable-debug --enable-experimental \
+          #   --disable-examples --disable-tools --disable-docs --disable-unit-tests \
+          #   --enable-pic --enable-small --target=$ARCH-darwin-gcc
           ../../libvpx/configure $PREFIX \
             --enable-static --disable-shared --disable-debug --enable-experimental \
             --disable-examples --disable-tools --disable-docs --disable-unit-tests \
-            --enable-pic --enable-small --target=$ARCH-darwin-gcc
+            --enable-pic --enable-small
           make -j $NCORES && make install
 
           cd ../
@@ -306,12 +310,12 @@ jobs:
           
           cd ../x265/build/linux
           cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$DEST -DENABLE_SHARED=off \
-            -DCMAKE_SYSTEM_PROCESSOR=arm64 ../../source
+            -DCMAKE_SYSTEM_PROCESSOR=$ARCH ../../source
           make -j $NCORES && make install
           
           cd ../../../aom/build
           cmake -G "Unix Makefiles" -DENABLE_TESTS=0 -DENABLE_DOCS=0 -DCMAKE_INSTALL_PREFIX=$DEST \
-            -DCMAKE_SYSTEM_PROCESSOR=arm64 ..
+            -DCMAKE_SYSTEM_PROCESSOR=$ARCH ..
           make -j $NCORES && make install
           
           cd ../../openh264
@@ -321,7 +325,7 @@ jobs:
           cd $SOURCES_DIR/FFmpeg
           ./configure $FREE_CONFIG $COMMON_CONFIG $MACOS_CONFIG
           make -j $NCORES && make install
-          cd $DEST/lib && cp lib*.dylib $BASE/release/darwin-arm64/free/
+          cd $DEST/lib && cp lib*.dylib $BASE/release/darwin-$ARCH/free/
           
           mkdir -p $BASE/release/darwin-$ARCH/full
           cd $SOURCES_DIR/FFmpeg

@@ -54,6 +54,12 @@ subprojects {
     
     task nativeVersion()  {
         doLast {
+            // make sure directory and version.inf exist
+            def dir = new File(projectDir, "velvet-video-natives")
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+
             new File(projectDir, "velvet-video-natives/version.inf").text = """
 Version=${version}
 Buildtime=${new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date())}
