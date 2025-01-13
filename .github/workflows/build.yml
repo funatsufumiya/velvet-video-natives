@@ -186,7 +186,7 @@ jobs:
         run: |
           export NCORES=${{ steps.cpu-cores.outputs.count }}
           export SOURCES_DIR=${{ github.workspace }}/build-sources
-          export BASE=$PWD
+          export BASE=$SOURCES_DIR
           export DEST=$BASE/ffmpeg-build-windows
           export PREFIX="--prefix=$DEST"
           export HOST="--host=x86_64-w64-mingw32"
@@ -232,9 +232,10 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=build.cmake ../../source
           make -j $NCORES && make install
 
-          cd ../../../aom/build
+          cd $SOURCES_DIR/
+          cd ./aom/build
           cmake -G "Unix Makefiles" -DENABLE_TESTS=0 -DENABLE_DOCS=0 -DCMAKE_INSTALL_PREFIX=$DEST \
-            -DCMAKE_TOOLCHAIN_FILE=$BASE/aom/build/cmake/toolchains/x86_64-mingw-gcc.cmake ..
+            -DCMAKE_TOOLCHAIN_FILE=$SOURCES_DIR/aom/build/cmake/toolchains/x86_64-mingw-gcc.cmake ..
           make -j $NCORES && make install
 
           cd ../../openh264
@@ -271,7 +272,7 @@ jobs:
         run: |
           export NCORES=${{ steps.cpu-cores.outputs.count }}
           export SOURCES_DIR=${{ github.workspace }}/build-sources
-          export BASE=$PWD
+          export BASE=$SOURCES_DIR
           export DEST=$BASE/ffmpeg-build-macos
           export PREFIX="--prefix=$DEST"
           export PKG_CONFIG_PATH=$DEST/lib/pkgconfig
@@ -345,7 +346,7 @@ jobs:
           export NCORES=${{ steps.cpu-cores.outputs.count }}
           export SOURCES_DIR=${{ github.workspace }}/build-sources
           export ARCH=${{ matrix.arch }}
-          export BASE=$PWD
+          export BASE=$SOURCES_DIR
           export DEST=$BASE/ffmpeg-build-linux
           export PREFIX="--prefix=$DEST"
           export PKG_CONFIG_PATH=$DEST/lib/pkgconfig
