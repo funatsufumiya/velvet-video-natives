@@ -55,7 +55,7 @@ jobs:
             mingw-w64
             
       - name: Download and extract dependencies
-        shell: ${{ matrix.shell }}
+        # shell: ${{ matrix.shell }}
         run: |
           mkdir -p sources
           cd sources
