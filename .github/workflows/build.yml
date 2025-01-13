@@ -290,19 +290,19 @@ jobs:
           cd ../lame-3.100
           ./configure $PREFIX --disable-shared --enable-static CFLAGS="-O3 -fPIC" && make -j $NCORES && make install
           
-          mkdir -p vpx-build-macos
-          cd vpx-build-macos
+          # WORKAROUND: skipping libvpx build in order to avoid `no decoder found` error
+          # mkdir -p vpx-build-macos
+          # cd vpx-build-macos
+          # # ../../libvpx/configure $PREFIX \
+          # #   --enable-static --disable-shared --disable-debug --enable-experimental \
+          # #   --disable-examples --disable-tools --disable-docs --disable-unit-tests \
+          # #   --enable-pic --enable-small --target=$ARCH-darwin-gcc
           # ../../libvpx/configure $PREFIX \
           #   --enable-static --disable-shared --disable-debug --enable-experimental \
           #   --disable-examples --disable-tools --disable-docs --disable-unit-tests \
-          #   --enable-pic --enable-small --target=$ARCH-darwin-gcc
-          ../../libvpx/configure $PREFIX \
-            --enable-static --disable-shared --disable-debug --enable-experimental \
-            --disable-examples --disable-tools --disable-docs --disable-unit-tests \
-            --enable-pic --enable-small
-          make -j $NCORES && make install
-
-          cd ../
+          #   --enable-pic --enable-small
+          # make -j $NCORES && make install
+          # cd ../
           
           cd ../x264
           ./configure $PREFIX --disable-cli --enable-static --enable-pic --enable-strip --disable-lavf --disable-swscale
@@ -418,3 +418,12 @@ jobs:
       - name: Build with Gradle
         shell: bash
         run: ./gradlew clean jar --no-daemon
+
+      - name: Upload Artifacts (from Gradle)
+        uses: actions/upload-artifact@v3
+        with:
+          name: gradle-build-${{ matrix.os }}
+          path: |
+            natives-free/build/libs/*.jar
+            natives-full/build/libs/*.jar
+
