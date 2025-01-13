@@ -403,12 +403,63 @@ jobs:
           ./configure $FULL_CONFIG $COMMON_CONFIG $LINUX_CONFIG --extra-libs=-lpthread
           make -j $NCORES && make install
           cd $DEST/lib && cp lib*.so* $BASE/release/linux64/full
+
+      - name: Copy Native Libraries to Project Structure
+        run: |
+          # Create directories for free version
+          mkdir -p natives-free/velvet-video-natives/linux64
+          mkdir -p natives-free/velvet-video-natives/windows64
           
-      - name: Upload Artifacts
+          # Create directories for full version  
+          mkdir -p natives-full/velvet-video-natives/linux64
+          mkdir -p natives-full/velvet-video-natives/windows64
+          
+          # Copy built libraries for free version
+          cp -r release/linux64/free/* natives-free/velvet-video-natives/linux64/
+          cp -r release/windows64/free/* natives-free/velvet-video-natives/windows64/
+          
+          # Copy built libraries for full version
+          cp -r release/linux64/full/* natives-full/velvet-video-natives/linux64/
+          cp -r release/windows64/full/* natives-full/velvet-video-natives/windows64/
+          
+          # Copy source files
+          mkdir -p natives-free/src
+          mkdir -p natives-full/src
+          cp -r build-sources/* natives-free/src/
+          cp -r build-sources/* natives-full/src/
+
+      - name: Clean up unnecessary files
+        run: |
+          # Clean up natives-free directories
+          rm -rf natives-free/src/aom/.git natives-free/src/aom/examples natives-free/src/aom/test natives-free/src/aom/tools
+          rm -rf natives-free/src/FFmpeg/.git natives-free/src/FFmpeg/doc natives-free/src/FFmpeg/tests natives-free/src/FFmpeg/tools
+          rm -rf natives-free/src/FFmpeg/presets natives-free/src/FFmpeg/libpostproc natives-free/src/FFmpeg/libavdevice
+          rm -rf natives-free/src/FFmpeg/libavcodec/mips
+          rm -rf natives-free/src/libvpx/.git natives-free/src/libvpx/examples natives-free/src/libvpx/test natives-free/src/libvpx/tools
+          rm -rf natives-free/src/openh264 natives-free/src/x264 natives-free/src/x265
+
+          # Clean up natives-full directories
+          rm -rf natives-full/src/aom/.git natives-full/src/aom/examples natives-full/src/aom/test natives-full/src/aom/tools
+          rm -rf natives-full/src/FFmpeg/.git natives-full/src/FFmpeg/doc natives-full/src/FFmpeg/tests natives-full/src/FFmpeg/tools
+          rm -rf natives-full/src/FFmpeg/presets natives-full/src/FFmpeg/libpostproc natives-full/src/FFmpeg/libavdevice
+          rm -rf natives-full/src/FFmpeg/libavcodec/mips
+          rm -rf natives-full/src/libvpx/.git natives-full/src/libvpx/examples natives-full/src/libvpx/test natives-full/src/libvpx/tools
+          rm -rf natives-full/src/openh264/.git natives-full/src/openh264/docs natives-full/src/openh264/test
+          rm -rf natives-full/src/openh264/testbin natives-full/src/openh264/autotest natives-full/src/openh264/res
+          rm -rf natives-full/src/x264/.git natives-full/src/x264/doc natives-full/src/x264/tools
+          rm -rf natives-full/src/x265/.git natives-full/src/x265/doc natives-full/src/x265/source/profile natives-full/src/x265/source/test
+          
+      - name: Upload Artifacts (free)
         uses: actions/upload-artifact@v3
         with:
           name: native-libs-${{ matrix.os }}
-          path: release
+          path: natives-free/
+
+      - name: Upload Artifacts (full)
+        uses: actions/upload-artifact@v3
+        with:
+          name: native-libs-${{ matrix.os }}
+          path: natives-full/
 
       - name: Setup Java
         uses: actions/setup-java@v3
