@@ -548,13 +548,13 @@ jobs:
       - name: Upload Artifacts (free)
         uses: actions/upload-artifact@v3
         with:
-          name: native-libs-${{ matrix.os }}-${{ matrix.arch }}.zip
+          name: native-libs-${{ matrix.os }}-${{ matrix.arch }}
           path: natives-free.zip
 
       - name: Upload Artifacts (full)
         uses: actions/upload-artifact@v3
         with:
-          name: native-libs-${{ matrix.os }}-${{ matrix.arch }}.zip
+          name: native-libs-${{ matrix.os }}-${{ matrix.arch }}
           path: natives-full.zip
 
       - name: Setup Java
@@ -570,7 +570,7 @@ jobs:
       - name: Upload Artifacts (from Gradle)
         uses: actions/upload-artifact@v3
         with:
-          name: gradle-build-${{ matrix.os }}-${{ matrix.arch }}.zip
+          name: gradle-build-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             natives-free/build/libs/*.jar
             natives-full/build/libs/*.jar
