@@ -114,7 +114,7 @@ jobs:
         env:
           WGET_OPTIONS: ${{ matrix.os == 'windows-latest' && '--no-check-certificate' || '' }}
 
-      - name: Build Windows Libraries
+      - name: Build Libraries (Windows)
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
         run: |
@@ -217,11 +217,13 @@ jobs:
           
           mkdir -p vpx-build-linux
           cd vpx-build-linux
-          ../libvpx/configure $PREFIX \
+          ../../libvpx/configure $PREFIX \
             --enable-static --disable-shared --disable-debug --enable-experimental \
             --disable-examples --disable-tools --disable-docs --disable-unit-tests \
             --enable-pic --enable-small
           make && make install
+
+          cd ../
           
           cd ../x264
           ./configure $PREFIX --disable-cli --enable-static --enable-pic --enable-strip --disable-lavf --disable-swscale
