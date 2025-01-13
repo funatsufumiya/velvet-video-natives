@@ -440,6 +440,9 @@ jobs:
 
       - name: Copy Native Libraries to Project Structure
         run: |
+          export WORKSPACE_DIR=$PWD
+          export SOURCES_DIR=$WORKSPACE_DIR/build-sources
+
           # Create directories for free version
           mkdir -p natives-free/velvet-video-natives/linux64
           mkdir -p natives-free/velvet-video-natives/windows64
@@ -449,18 +452,18 @@ jobs:
           mkdir -p natives-full/velvet-video-natives/windows64
           
           # Copy built libraries for free version
-          cp -r release/linux64/free/* natives-free/velvet-video-natives/linux64/
-          cp -r release/windows64/free/* natives-free/velvet-video-natives/windows64/
+          cp -r $SOURCES_DIR/release/linux64/free/* natives-free/velvet-video-natives/linux64/
+          cp -r $SOURCES_DIR/release/windows64/free/* natives-free/velvet-video-natives/windows64/
           
           # Copy built libraries for full version
-          cp -r release/linux64/full/* natives-full/velvet-video-natives/linux64/
-          cp -r release/windows64/full/* natives-full/velvet-video-natives/windows64/
+          cp -r $SOURCES_DIR/release/linux64/full/* natives-full/velvet-video-natives/linux64/
+          cp -r $SOURCES_DIR/release/windows64/full/* natives-full/velvet-video-natives/windows64/
           
           # Copy source files
           mkdir -p natives-free/src
           mkdir -p natives-full/src
-          cp -r build-sources/* natives-free/src/
-          cp -r build-sources/* natives-full/src/
+          cp -r $SOURCES_DIR/build-sources/* natives-free/src/
+          cp -r $SOURCES_DIR/build-sources/* natives-full/src/
 
       - name: Clean up unnecessary files
         run: |
