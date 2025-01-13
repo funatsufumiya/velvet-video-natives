@@ -82,6 +82,13 @@ jobs:
           ls /mingw64/bin/ | grep strings
           ls /mingw64/bin/ | grep ar
 
+          # x86_64-w64-mingw32-strings --version
+          # x86_64-w64-mingw32-ar --version
+
+          # WORKAROUND (copy strings.exe as x86_64-w64-mingw32-strings.exe)
+          cp /mingw64/bin/strings.exe /mingw64/bin/x86_64-w64-mingw32-strings.exe
+          cp /mingw64/bin/ar.exe /mingw64/bin/x86_64-w64-mingw32-ar.exe
+
           x86_64-w64-mingw32-strings --version
           x86_64-w64-mingw32-ar --version
             
