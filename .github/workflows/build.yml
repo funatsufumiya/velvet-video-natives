@@ -512,29 +512,31 @@ jobs:
           # Copy source files
           mkdir -p natives-free/src
           mkdir -p natives-full/src
-          cp -r $SOURCES_DIR/* natives-free/src/
-          cp -r $SOURCES_DIR/* natives-full/src/
 
-      - name: Clean up unnecessary files
-        run: |
-          # Clean up natives-free directories
-          rm -rf natives-free/src/aom/.git natives-free/src/aom/examples natives-free/src/aom/test natives-free/src/aom/tools
-          rm -rf natives-free/src/FFmpeg/.git natives-free/src/FFmpeg/doc natives-free/src/FFmpeg/tests natives-free/src/FFmpeg/tools
-          rm -rf natives-free/src/FFmpeg/presets natives-free/src/FFmpeg/libpostproc natives-free/src/FFmpeg/libavdevice
-          rm -rf natives-free/src/FFmpeg/libavcodec/mips
-          rm -rf natives-free/src/libvpx/.git natives-free/src/libvpx/examples natives-free/src/libvpx/test natives-free/src/libvpx/tools
-          rm -rf natives-free/src/openh264 natives-free/src/x264 natives-free/src/x265
+          # But not actually copy the source files, because they are too big
+          # cp -r $SOURCES_DIR/* natives-free/src/
+          # cp -r $SOURCES_DIR/* natives-full/src/
 
-          # Clean up natives-full directories
-          rm -rf natives-full/src/aom/.git natives-full/src/aom/examples natives-full/src/aom/test natives-full/src/aom/tools
-          rm -rf natives-full/src/FFmpeg/.git natives-full/src/FFmpeg/doc natives-full/src/FFmpeg/tests natives-full/src/FFmpeg/tools
-          rm -rf natives-full/src/FFmpeg/presets natives-full/src/FFmpeg/libpostproc natives-full/src/FFmpeg/libavdevice
-          rm -rf natives-full/src/FFmpeg/libavcodec/mips
-          rm -rf natives-full/src/libvpx/.git natives-full/src/libvpx/examples natives-full/src/libvpx/test natives-full/src/libvpx/tools
-          rm -rf natives-full/src/openh264/.git natives-full/src/openh264/docs natives-full/src/openh264/test
-          rm -rf natives-full/src/openh264/testbin natives-full/src/openh264/autotest natives-full/src/openh264/res
-          rm -rf natives-full/src/x264/.git natives-full/src/x264/doc natives-full/src/x264/tools
-          rm -rf natives-full/src/x265/.git natives-full/src/x265/doc natives-full/src/x265/source/profile natives-full/src/x265/source/test
+      # - name: Clean up unnecessary files
+      #   run: |
+      #     # Clean up natives-free directories
+      #     rm -rf natives-free/src/aom/.git natives-free/src/aom/examples natives-free/src/aom/test natives-free/src/aom/tools
+      #     rm -rf natives-free/src/FFmpeg/.git natives-free/src/FFmpeg/doc natives-free/src/FFmpeg/tests natives-free/src/FFmpeg/tools
+      #     rm -rf natives-free/src/FFmpeg/presets natives-free/src/FFmpeg/libpostproc natives-free/src/FFmpeg/libavdevice
+      #     rm -rf natives-free/src/FFmpeg/libavcodec/mips
+      #     rm -rf natives-free/src/libvpx/.git natives-free/src/libvpx/examples natives-free/src/libvpx/test natives-free/src/libvpx/tools
+      #     rm -rf natives-free/src/openh264 natives-free/src/x264 natives-free/src/x265
+
+      #     # Clean up natives-full directories
+      #     rm -rf natives-full/src/aom/.git natives-full/src/aom/examples natives-full/src/aom/test natives-full/src/aom/tools
+      #     rm -rf natives-full/src/FFmpeg/.git natives-full/src/FFmpeg/doc natives-full/src/FFmpeg/tests natives-full/src/FFmpeg/tools
+      #     rm -rf natives-full/src/FFmpeg/presets natives-full/src/FFmpeg/libpostproc natives-full/src/FFmpeg/libavdevice
+      #     rm -rf natives-full/src/FFmpeg/libavcodec/mips
+      #     rm -rf natives-full/src/libvpx/.git natives-full/src/libvpx/examples natives-full/src/libvpx/test natives-full/src/libvpx/tools
+      #     rm -rf natives-full/src/openh264/.git natives-full/src/openh264/docs natives-full/src/openh264/test
+      #     rm -rf natives-full/src/openh264/testbin natives-full/src/openh264/autotest natives-full/src/openh264/res
+      #     rm -rf natives-full/src/x264/.git natives-full/src/x264/doc natives-full/src/x264/tools
+      #     rm -rf natives-full/src/x265/.git natives-full/src/x265/doc natives-full/src/x265/source/profile natives-full/src/x265/source/test
 
       - name: Zip for Artifacts
         run: |
