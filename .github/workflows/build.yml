@@ -85,7 +85,7 @@ jobs:
             pkg-config \
             mingw-w64
 
-          brew install automake fdk-aac git lame libass libtool libvorbis libvpx \
+          brew install automake fdk-aac git lame libass libtool libvorbis \
             opus sdl shtool texi2html theora wget x264 x265 xvid nasm
 
       - name: Check gcc, strings and ar (Windows)
