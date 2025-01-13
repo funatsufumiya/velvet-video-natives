@@ -103,13 +103,16 @@ jobs:
           # FIXME: not found
           # x86_64-w64-mingw32-strings --version
           # x86_64-w64-mingw32-ar --version
+          # x86_64-w64-mingw32-strip --version
 
           # WORKAROUND (copy strings.exe as x86_64-w64-mingw32-strings.exe)
           cp /mingw64/bin/strings.exe /mingw64/bin/x86_64-w64-mingw32-strings.exe
           cp /mingw64/bin/ar.exe /mingw64/bin/x86_64-w64-mingw32-ar.exe
+          cp /mingw64/bin/strip.exe /mingw64/bin/x86_64-w64-mingw32-strip.exe
 
           x86_64-w64-mingw32-strings --version
           x86_64-w64-mingw32-ar --version
+          x86_64-w64-mingw32-strip --version
             
       - name: Download and extract dependencies (Windows)
         if: matrix.os == 'windows-latest'
