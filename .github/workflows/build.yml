@@ -129,15 +129,18 @@ jobs:
           # x86_64-w64-mingw32-strings --version
           # x86_64-w64-mingw32-ar --version
           # x86_64-w64-mingw32-strip --version
+          # x86_64-w64-mingw32-nm --version
 
           # WORKAROUND (copy strings.exe as x86_64-w64-mingw32-strings.exe)
           cp /mingw64/bin/strings.exe /mingw64/bin/x86_64-w64-mingw32-strings.exe
           cp /mingw64/bin/ar.exe /mingw64/bin/x86_64-w64-mingw32-ar.exe
           cp /mingw64/bin/strip.exe /mingw64/bin/x86_64-w64-mingw32-strip.exe
+          cp /mingw64/bin/nm.exe /mingw64/bin/x86_64-w64-mingw32-nm.exe
 
           x86_64-w64-mingw32-strings --version
           x86_64-w64-mingw32-ar --version
           x86_64-w64-mingw32-strip --version
+          x86_64-w64-mingw32-nm --version
             
       - name: Download and extract dependencies (Windows)
         if: matrix.os == 'windows-latest'
